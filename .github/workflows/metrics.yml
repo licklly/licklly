@@ -1,0 +1,52 @@
+name: GitHub Metrics
+
+on:
+  schedule:
+    - cron: "15 12 * * *"
+    # https://docs.github.com/zh/actions/using-workflows/events-that-trigger-workflows#schedule
+  workflow_dispatch:
+  
+jobs:
+  github-metrics:
+    runs-on: ubuntu-latest
+    steps:
+       ## 📅 Isometric commit calendar
+      - name: Full-year calendar
+        uses: lowlighter/metrics@latest
+        with:
+          filename: github-metrics/isocalendar.fullyear.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # 不添加基础信息
+          base: ""
+          # 输出分支
+          committer_branch: output
+          # 使用此插件
+          plugin_isocalendar: yes
+          # 设置成显示整年
+          plugin_isocalendar_duration: full-year
+          
+       ## 📆 Commit calendar
+      - name: Full history calendar
+        uses: lowlighter/metrics@latest
+        with:
+          filename: github-metrics/calendar.full.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: ""
+          committer_branch: output
+          plugin_calendar: yes
+          plugin_calendar_limit: 0
+       
+       ## ✨ Stargazers   
+      - name: Using chartist charts
+        uses: lowlighter/metrics@latest
+        with:
+          filename: github-metrics/stargazers.chartist.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: ""
+          committer_branch: output
+          plugin_stargazers: yes
+          plugin_stargazers_charts_type: chartist
+        
+      - name: Submit a refresh Cache to CDN
+        run: |
+          curl https://purge.jsdelivr.net/gh/licklly/licklly@output/ >/dev/null 2>&1

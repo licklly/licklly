@@ -1,0 +1,31 @@
+name: 3D Contrib
+
+on:
+  schedule:
+    - cron: "20 10 * * *" ## UTC+8
+    # https://docs.github.com/zh/actions/using-workflows/events-that-trigger-workflows#schedule
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: generate-github-profile-3d-contrib
+    steps:
+      - uses: yoshi389111/github-profile-3d-contrib@0.7.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.repository_owner }}
+      - name: Commit & Push to output branch
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: .
+          commit_message: "generated 3D Contrib"
+          keep_history: true
+          committer: ${{ github.repository_owner }} <${{ secrets.GIT_EMAIL }}>
+          author: ${{ github.repository_owner }} <${{ secrets.GIT_EMAIL }}>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Submit a refresh Cache to CDN
+        run: |
+          curl https://purge.jsdelivr.net/gh/licklly/licklly@output/ >/dev/null 2>&1
